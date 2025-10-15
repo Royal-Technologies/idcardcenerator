@@ -1,0 +1,374 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic ID Card Generator</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            gap: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* --- Form Styling --- */
+        .form-section {
+            flex: 1;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            height: fit-content;
+        }
+
+        .form-section h2 {
+            color: #333;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-top: 15px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        input[type="text"], input[type="file"], input[type="color"], input[type="number"], select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box; 
+        }
+
+        input[type="color"] {
+            height: 40px;
+            padding: 2px;
+            width: 100%; 
+        }
+
+        /* --- ID Card and Download Styling --- */
+        .id-card-section {
+            flex: 1;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .id-card-frame {
+            width: 350px; 
+            height: 550px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 15px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            margin: 20px auto;
+            overflow: hidden;
+            position: relative;
+            padding-top: 10px;
+            transform-origin: top left; 
+            transition: background-color 0.3s;
+        }
+
+        /* Header Section */
+        .id-card-header {
+            text-align: center;
+            padding: 10px 0;
+        }
+
+        .id-card-logo {
+            width: 70px;
+            height: 70px;
+            object-fit: contain;
+            margin-bottom: 5px;
+        }
+
+        .id-card-inst-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #000;
+            margin: 5px 0;
+            padding: 5px 15px;
+            /* Border colors are now set by JS, but we keep the structure here */
+            border-top: 2px solid #ff007f; 
+            border-bottom: 2px solid #ff007f; 
+        }
+
+        /* Photo and Details Section */
+        .id-card-body {
+            padding: 10px 20px;
+            padding-bottom: 30px; 
+        }
+
+        .id-card-photo-container {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .id-card-photo {
+            width: 100px;
+            height: 120px;
+            object-fit: cover;
+            border: 1px solid #ccc;
+            padding: 2px;
+        }
+
+        /* Left-alignment for details */
+        .id-card-details p {
+            margin: 10px 0; 
+            font-size: 15px;
+            color: #333;
+            line-height: 1.5;
+            text-align: left; 
+        }
+
+        .id-card-details span.label {
+            font-weight: bold;
+            color: #000;
+            display: inline-block;
+            width: 110px; 
+            text-align: left;
+        }
+
+        .id-card-details span.value {
+            text-align: left; 
+        }
+        
+        /* Footer Box (Blue Box) */
+        .id-card-footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #007bff; 
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+            font-weight: bold;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        #downloadBtn {
+            background-color: #28a745;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 25px;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        #downloadBtn:hover {
+            background-color: #1e7e34;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        
+        <div class="form-section">
+            <h2>ID Card Input Form</h2>
+            <form id="idCardForm">
+
+                <label for="headerBorderColor">Header Border Color:</label>
+                <input type="color" id="headerBorderColor" value="#dddddd">
+                
+                <label for="bgColor">Card Background Color:</label>
+                <input type="color" id="bgColor" value="#ffffff">
+
+                <label for="institutionLogo">Institution Logo (Upload Image):</label>
+                <input type="file" id="institutionLogo" accept="image/*">
+
+                <label for="studentPhoto">Student Photo (Upload Image):</label>
+                <input type="file" id="studentPhoto" accept="image/*">
+
+                <label for="institutionName">Institution Name:</label>
+                <input type="text" id="institutionName" value="European University of Bangladesh">
+
+                <label for="studentName">Student Name:</label>
+                <input type="text" id="studentName" value="S M Mehdi Akram">
+
+                <label for="program">Program:</label>
+                <input type="text" id="program" value="MSc">
+                
+                <label for="idNumber">ID Number:</label>
+                <input type="number" id="idNumber" value="">
+                
+                <label for="session">Year/Session:</label>
+                <input type="text" id="session" value="2025-2026">
+                
+                <label for="bloodGroup">Blood Group:</label>
+                <select id="bloodGroup">
+                    <option value="A+">A+</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B-">B-</option>
+                    <option value="O+">O+</option>
+                    <option value="O-">O-</option>
+                    <option value="AB+">AB+</option>
+                    <option value="AB-">AB-</option>
+                </select>
+                
+            </form>
+        </div>
+
+        <div class="id-card-section">
+            <h2>ID Card Preview</h2>
+            <div id="idCardPreview" class="id-card-frame">
+                <div style="text-align: center; padding: 20px; color: #888;">Fill out the form to see the ID card preview.</div>
+            </div>
+            <button id="downloadBtn">Download ID Card (PNG)</button>
+			<p>Developed by <a href="https://www.royaltechbd.com" target="_blank">Royal Technologies</a></p>
+        </div>
+
+    </div>
+
+    <script>
+        const form = document.getElementById('idCardForm');
+        const previewContainer = document.getElementById('idCardPreview');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const idNumberInput = document.getElementById('idNumber');
+
+        // Function to generate the default ID Number based on current year and timestamp
+        const generateDefaultIdNumber = () => {
+            const currentYear = new Date().getFullYear().toString();
+            // Get the first two digits of the current year (e.g., "25" for 2025)
+            const yearPrefix = currentYear.substring(2); 
+            // Get the current Unix timestamp (time() in milliseconds)
+            const timestamp = Date.now();
+            
+            // Combine year prefix with a shortened timestamp (e.g., last 6 digits of timestamp)
+            // Using a full timestamp might be too long, so we take the last part for brevity
+            const uniquePart = timestamp.toString().slice(-6); 
+            return yearPrefix + uniquePart;
+        };
+
+        // Set the initial value for ID Number when the page loads
+        idNumberInput.value = generateDefaultIdNumber();
+
+
+        // Helper function to read a file and return a Data URL
+        const readFile = (file, callback) => {
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    callback(e.target.result);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                callback(null);
+            }
+        };
+
+        // Main function to render the ID card
+        const renderIDCard = async () => {
+            // 1. Get all text and color values
+            const institutionName = document.getElementById('institutionName').value;
+            const studentName = document.getElementById('studentName').value;
+            const program = document.getElementById('program').value;
+            const idNumber = idNumberInput.value; // Get value from input
+            const session = document.getElementById('session').value;
+            const bloodGroup = document.getElementById('bloodGroup').value;
+            const bgColor = document.getElementById('bgColor').value;
+            const headerBorderColor = document.getElementById('headerBorderColor').value;
+
+            // Apply background color to the card frame
+            previewContainer.style.backgroundColor = bgColor;
+
+            // 2. Get image files
+            const studentPhotoFile = document.getElementById('studentPhoto').files[0];
+            const logoFile = document.getElementById('institutionLogo').files[0];
+
+            // Use promises to handle file reading asynchronously
+            const photoURL = await new Promise(resolve => {
+                readFile(studentPhotoFile, (dataURL) => {
+                    resolve(dataURL || 'https://via.placeholder.com/100x120.png?text=Photo');
+                });
+            });
+
+            const logoURL = await new Promise(resolve => {
+                readFile(logoFile, (dataURL) => {
+                    resolve(dataURL || 'https://via.placeholder.com/70.png?text=Logo');
+                });
+            });
+
+            // 3. Construct the ID Card HTML structure (Using dynamic border color)
+            const cardHTML = `
+                <div class="id-card-header">
+                    <img src="${logoURL}" alt="Institution Logo" class="id-card-logo">
+                    <div class="id-card-inst-name" style="border-top: 2px solid ${headerBorderColor}; border-bottom: 2px solid ${headerBorderColor};">
+                        ${institutionName}
+                    </div>
+                </div>
+                <div class="id-card-body">
+                    <div class="id-card-photo-container">
+                        <img src="${photoURL}" alt="Student Photo" class="id-card-photo">
+                    </div>
+                    <div class="id-card-details">
+                        <p><span class="label">Name:</span> <span class="value">${studentName}</span></p>
+                        <p><span class="label">Program:</span> <span class="value">${program}</span></p>
+                        <p><span class="label">ID Number:</span> <span class="value">${idNumber}</span></p>
+                        <p><span class="label">Session:</span> <span class="value">${session}</span></p>
+                        <p><span class="label">Blood Group:</span> <span class="value">${bloodGroup}</span></p>
+                    </div>
+                </div>
+                <div class="id-card-footer">
+                    STUDENT ID CARD
+                </div>
+            `;
+
+            // 4. Update the preview
+            previewContainer.innerHTML = cardHTML;
+        };
+
+        // Event Listeners for Auto-Update
+        // Any change in the form triggers a re-render of the ID card
+        form.addEventListener('input', renderIDCard);
+
+        // Download Button Logic
+        downloadBtn.addEventListener('click', () => {
+            const cardElement = document.getElementById('idCardPreview');
+
+            html2canvas(cardElement, { 
+                scale: 3, 
+                allowTaint: true,
+                useCORS: true,
+                backgroundColor: cardElement.style.backgroundColor || '#ffffff'
+            }).then(canvas => {
+                const image = canvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.href = image;
+                link.download = 'ID_Card_' + document.getElementById('studentName').value.replace(/\s/g, '_') + '.png';
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            });
+        });
+
+        // Initial render on page load
+        renderIDCard();
+    </script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"version":"2024.11.0","token":"35498b6dbc0a456ab618da553e8ca304","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>
